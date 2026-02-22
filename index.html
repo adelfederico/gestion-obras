@@ -268,8 +268,22 @@ function fltMat(q){
   const dd=document.getElementById('c-dd');
   const f=q.length<1?S.mats.slice(0,30):S.mats.filter(m=>m.nombre.toLowerCase().includes(q.toLowerCase())||m.categoria.toLowerCase().includes(q.toLowerCase())).slice(0,20);
   if(!f.length){dd.classList.remove('open');return;}
-  dd.innerHTML=f.map(m=>`<div class="di" onclick="selMat('${m.id}',${JSON.stringify(m.nombre)},'${m.unidad}','${m.moneda_pref}')"><strong>${m.nombre}</strong><br><span class="cat">${m.unidad} · ${m.categoria}</span></div>`).join('');
+  dd.innerHTML=f.map((m,i)=>{
+    const idx='_m'+i;
+    window[idx]=m;
+    return `<div class="di" onclick="selMatIdx('${idx}')"><strong>${m.nombre}</strong><br><span class="cat">${m.unidad} · ${m.categoria}</span></div>`;
+  }).join('');
   dd.classList.add('open');
+}
+function selMatIdx(idx){
+  const m=window[idx];
+  if(!m) return;
+  document.getElementById('c-mi').value=m.nombre;
+  document.getElementById('c-mid').value=m.id;
+  document.getElementById('c-mun').value=m.unidad;
+  document.getElementById('c-un').value=m.unidad;
+  document.getElementById('c-dd').classList.remove('open');
+  setMC(m.moneda_pref==='USD'?'USD':'ARS');
 }
 function selMat(id,n,u,mp){
   document.getElementById('c-mi').value=n;
@@ -423,8 +437,18 @@ function fltTr(q){
   const dd=document.getElementById('m-dd');
   const f=q.length<1?S.trabs.slice(0,20):S.trabs.filter(t=>t.nombre.toLowerCase().includes(q.toLowerCase()));
   const extra=q.length>1?`<div class="di" onclick="selTr(${JSON.stringify(q)})"><strong>${q}</strong><br><span class="cat">Nuevo / ingreso libre</span></div>`:'';
-  dd.innerHTML=f.map(t=>`<div class="di" onclick="selTr(${JSON.stringify(t.nombre)})"><strong>${t.nombre}</strong><br><span class="cat">${t.categoria}</span></div>`).join('')+extra;
+  dd.innerHTML=f.map((t,i)=>{
+    const idx='_t'+i;
+    window[idx]=t;
+    return `<div class="di" onclick="selTrIdx('${idx}')"><strong>${t.nombre}</strong><br><span class="cat">${t.categoria}</span></div>`;
+  }).join('')+extra;
   if(f.length||q.length>1) dd.classList.add('open'); else dd.classList.remove('open');
+}
+function selTrIdx(idx){
+  const t=window[idx];
+  if(!t) return;
+  document.getElementById('m-ti').value=t.nombre;
+  document.getElementById('m-dd').classList.remove('open');
 }
 function selTr(n){document.getElementById('m-ti').value=n;document.getElementById('m-dd').classList.remove('open');}
 function setTM(t,el){
