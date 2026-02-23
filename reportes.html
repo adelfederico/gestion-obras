@@ -166,6 +166,7 @@ async function cargarReportes(){
 }
 
 function renderEconomico(d){
+  if(!d || !d.totales) { document.getElementById('kpi-economico').innerHTML='<div class="kpi"><div class="kpi-label">Sin datos</div><div class="kpi-valor" style="font-size:14px">No hay ítems o compras registradas para esta obra</div></div>'; document.querySelector('#tbl-economico tbody').innerHTML=''; return; }
   const desvioClass = d.totales.desvio_pct > 10 ? 'rojo' : d.totales.desvio_pct > 0 ? 'amarillo' : 'verde';
   document.getElementById('kpi-economico').innerHTML = `
     <div class="kpi"><div class="kpi-label">Presupuesto Total</div><div class="kpi-valor">$${fmt(d.totales.presup_ars)}</div><div class="kpi-sub">ARS</div></div>
@@ -182,6 +183,7 @@ function renderEconomico(d){
 }
 
 function renderMateriales(d){
+  if(!d || !d.totales) { document.getElementById('kpi-materiales').innerHTML='<div class="kpi"><div class="kpi-label">Sin datos</div><div class="kpi-valor" style="font-size:14px">No hay datos para esta obra todavía</div></div>'; return; }
   document.getElementById('kpi-materiales').innerHTML = `
     <div class="kpi"><div class="kpi-label">Total Materiales</div><div class="kpi-valor">$${fmt(d.totales.monto_ars)}</div><div class="kpi-sub">${fmtUSD(d.totales.monto_usd)}</div></div>
     <div class="kpi azul"><div class="kpi-label">Tipos de Material</div><div class="kpi-valor">${d.totales.cantidad_materiales}</div><div class="kpi-sub">distintos</div></div>
@@ -201,6 +203,7 @@ function renderMateriales(d){
 }
 
 function renderManoObra(d){
+  if(!d || !d.totales) { document.getElementById('kpi-manoobra').innerHTML='<div class="kpi"><div class="kpi-label">Sin datos</div><div class="kpi-valor" style="font-size:14px">No hay datos para esta obra todavía</div></div>'; return; }
   document.getElementById('kpi-manoobra').innerHTML = `
     <div class="kpi"><div class="kpi-label">Total MO</div><div class="kpi-valor">$${fmt(d.totales.monto_ars)}</div><div class="kpi-sub">${fmtUSD(d.totales.monto_usd)}</div></div>
     <div class="kpi azul"><div class="kpi-label">Jornal</div><div class="kpi-valor">$${fmt(d.por_tipo.Jornal.ars)}</div></div>
@@ -212,6 +215,7 @@ function renderManoObra(d){
 }
 
 function renderCertificado(d){
+  if(!d || !d.totales) { document.getElementById('kpi-certificado').innerHTML='<div class="kpi"><div class="kpi-label">Sin datos</div><div class="kpi-valor" style="font-size:14px">No hay datos para esta obra todavía</div></div>'; return; }
   const pct = d.totales.avance_global_pct;
   document.getElementById('kpi-certificado').innerHTML = `
     <div class="kpi"><div class="kpi-label">Avance Global</div><div class="kpi-valor">${pct}%</div>
