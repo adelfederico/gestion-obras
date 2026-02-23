@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes — GestionObras</title>
+<style>
+:root{--bg:#0f1923;--bg2:#162030;--bg3:#1d2d3f;--card:#1a2a3a;--border:#2a3f58;--accent:#f0a500;--text:#e8edf2;--text2:#8fa8c0;--text3:#4a6a88;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;--radius:14px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh;}
+#topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:20px;font-weight:800;color:var(--accent);}
+.logo span{color:var(--text2);font-weight:400;font-size:12px;margin-left:8px;}
+#main{max-width:1100px;margin:0 auto;padding:24px;}
+.selector-obra{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.selector-obra label{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;}
+select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:15px;padding:10px 14px;border-radius:10px;outline:none;min-width:280px;}
+select:focus{border-color:var(--accent);}
+.btn{background:var(--accent);color:#000;font-weight:700;font-size:14px;padding:10px 22px;border-radius:10px;border:none;cursor:pointer;}
+.btn:hover{opacity:.9;}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--accent);font-weight:700;font-size:13px;padding:8px 16px;border-radius:8px;cursor:pointer;}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:4px;}
+.tab{flex:1;padding:10px 8px;border-radius:9px;border:none;background:transparent;color:var(--text2);font-size:13px;font-weight:700;cursor:pointer;text-align:center;}
+.tab.active{background:var(--accent);color:#000;}
+.panel{display:none;}
+.panel.active{display:block;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.kpi-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.kpi-valor{font-size:26px;font-weight:800;color:var(--accent);}
+.kpi-sub{font-size:12px;color:var(--text2);margin-top:4px;}
+.kpi.verde .kpi-valor{color:var(--green);}
+.kpi.rojo .kpi-valor{color:var(--red);}
+.kpi.azul .kpi-valor{color:var(--blue);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px;}
+.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg3);}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-verde{background:#1a3a1a;color:var(--green);}
+.badge-rojo{background:#3a1a1a;color:var(--red);}
+.badge-amarillo{background:#3a2a00;color:var(--accent);}
+.badge-azul{background:#1a2a3a;color:var(--blue);}
+.barra-wrap{background:var(--bg3);border-radius:4px;height:8px;margin-top:4px;}
+.barra{height:8px;border-radius:4px;background:var(--accent);}
+.barra.verde{background:var(--green);}
+.barra.rojo{background:var(--red);}
+#loading{text-align:center;padding:60px;color:var(--text2);display:none;}
+#empty{text-align:center;padding:60px;color:var(--text3);}
+.exportar-bar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:16px;}
+.num{text-align:right;}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="logo">🏗️ OBRAS <span>Reportes</span></div>
+  <a href="index.html" style="color:var(--text2);font-size:13px;text-decoration:none;">← Volver a la app</a>
+</div>
+<div id="main">
+  <div class="selector-obra">
+    <label>Obra</label>
+    <select id="sel-obra"><option value="">Seleccioná una obra...</option></select>
+    <button class="btn" onclick="cargarReportes()">Ver Reportes</button>
+  </div>
+  <div id="loading">⏳ Cargando reportes...</div>
+  <div id="empty">Seleccioná una obra y hacé clic en "Ver Reportes"</div>
+  <div id="contenido" style="display:none">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('economico')">💰 Estado Económico</button>
+      <button class="tab" onclick="showTab('materiales')">🧱 Materiales</button>
+      <button class="tab" onclick="showTab('manoobra')">👷 Mano de Obra</button>
+      <button class="tab" onclick="showTab('certificado')">📄 Certificado</button>
+    </div>
+    <!-- PANEL ECONÓMICO -->
+    <div class="panel active" id="panel-economico">
+      <div class="kpi-grid" id="kpi-economico"></div>
+      <div class="card">
+        <div class="card-title">Detalle por Ítem <button class="btn-outline" onclick="exportarTabla('tbl-economico','estado_economico')">⬇ Excel</button></div>
+        <table id="tbl-economico"><thead><tr><th>Ítem</th><th>Descripción</th><th>Presup. ARS</th><th>Gasto ARS</th><th>Desvío %</th><th>Estado</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <!-- PANEL MATERIALES -->
+    <div class="panel" id="panel-materiales">
+      <div class="kpi-grid" id="kpi-materiales"></div>
+      <div class="card">
+        <div class="card-title">Por Categoría</div>
+        <div id="cat-materiales"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Detalle por Material <button class="btn-outline" onclick="exportarTabla('tbl-materiales','materiales')">⬇ Excel</button></div>
+        <table id="tbl-materiales"><thead><tr><th>Material</th><th>Categoría</th><th>Unidad</th><th>Cant. Total</th><th>Monto ARS</th><th>Último Precio</th><th>Proveedor</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <!-- PANEL MANO DE OBRA -->
+    <div class="panel" id="panel-manoobra">
+      <div class="kpi-grid" id="kpi-manoobra"></div>
+      <div class="card">
+        <div class="card-title">Costo por Ítem <button class="btn-outline" onclick="exportarTabla('tbl-manoobra','mano_de_obra')">⬇ Excel</button></div>
+        <table id="tbl-manoobra"><thead><tr><th>Ítem</th><th>Descripción</th><th>Monto ARS</th><th>Monto USD</th><th>Registros</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <!-- PANEL CERTIFICADO -->
+    <div class="panel" id="panel-certificado">
+      <div class="kpi-grid" id="kpi-certificado"></div>
+      <div class="card">
+        <div class="card-title">Avance por Ítem <button class="btn-outline" onclick="exportarTabla('tbl-certificado','certificado')">⬇ Excel</button></div>
+        <table id="tbl-certificado"><thead><tr><th>Ítem</th><th>Descripción</th><th>Presup. ARS</th><th>Avance %</th><th>Certificado ARS</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpB1SaEG2oKKkAmOEdVk4pNmwFWEkINHdhW4EHuNTqtq-q-Lu9N9kAVc_lB7ckl5Sn/exec';
+
+function jsonp(url){
+  return new Promise((resolve,reject)=>{
+    const cb='cb'+Math.random().toString(36).slice(2);
+    window[cb]=function(d){delete window[cb];document.getElementById('_s'+cb)&&document.getElementById('_s'+cb).remove();resolve(d);};
+    const s=document.createElement('script');s.id='_s'+cb;
+    s.onerror=()=>reject(new Error('Sin conexión'));
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb;
+    document.body.appendChild(s);
+  });
+}
+
+function fmt(n){return new Intl.NumberFormat('es-AR',{minimumFractionDigits:0,maximumFractionDigits:0}).format(n||0);}
+function fmtUSD(n){return 'U$S '+new Intl.NumberFormat('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);}
+function fmtPct(n){return (n>0?'+':'')+n+'%';}
+
+function showTab(id){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['economico','materiales','manoobra','certificado'][i]===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+id));
+}
+
+async function init(){
+  const obras = await jsonp(SCRIPT_URL+'?action=getObras');
+  const sel = document.getElementById('sel-obra');
+  obras.forEach(o=>{const op=document.createElement('option');op.value=o.id;op.textContent=o.nombre;sel.appendChild(op);});
+}
+
+async function cargarReportes(){
+  const id = document.getElementById('sel-obra').value;
+  if(!id) return alert('Seleccioná una obra primero');
+  document.getElementById('empty').style.display='none';
+  document.getElementById('contenido').style.display='none';
+  document.getElementById('loading').style.display='block';
+  try {
+    const [eco, mat, mo, cert] = await Promise.all([
+      jsonp(SCRIPT_URL+'?action=getReporteEconomico&id_obra='+id),
+      jsonp(SCRIPT_URL+'?action=getReporteMateriales&id_obra='+id),
+      jsonp(SCRIPT_URL+'?action=getReporteManoObra&id_obra='+id),
+      jsonp(SCRIPT_URL+'?action=getReporteCertificado&id_obra='+id),
+    ]);
+    renderEconomico(eco);
+    renderMateriales(mat);
+    renderManoObra(mo);
+    renderCertificado(cert);
+    document.getElementById('loading').style.display='none';
+    document.getElementById('contenido').style.display='block';
+  } catch(e) {
+    document.getElementById('loading').textContent='❌ Error: '+e.message;
+  }
+}
+
+function renderEconomico(d){
+  const desvioClass = d.totales.desvio_pct > 10 ? 'rojo' : d.totales.desvio_pct > 0 ? 'amarillo' : 'verde';
+  document.getElementById('kpi-economico').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Presupuesto Total</div><div class="kpi-valor">$${fmt(d.totales.presup_ars)}</div><div class="kpi-sub">ARS</div></div>
+    <div class="kpi"><div class="kpi-label">Gasto Real</div><div class="kpi-valor">$${fmt(d.totales.gasto_ars)}</div><div class="kpi-sub">${fmtUSD(d.totales.gasto_usd)}</div></div>
+    <div class="kpi ${desvioClass}"><div class="kpi-label">Desvío</div><div class="kpi-valor">${fmtPct(d.totales.desvio_pct)}</div><div class="kpi-sub">$${fmt(Math.abs(d.totales.desvio_ars))} ${d.totales.desvio_ars>0?'sobre':'bajo'} presupuesto</div></div>
+    <div class="kpi"><div class="kpi-label">Actualizado</div><div class="kpi-valor" style="font-size:16px">${d.fecha}</div></div>
+  `;
+  const tbody = document.querySelector('#tbl-economico tbody');
+  tbody.innerHTML = d.items.map(it=>{
+    const pct = it.desvio_pct;
+    const badge = pct > 10 ? `<span class="badge badge-rojo">+${pct}%</span>` : pct > 0 ? `<span class="badge badge-amarillo">+${pct}%</span>` : `<span class="badge badge-verde">${pct}%</span>`;
+    return `<tr><td>${it.codigo}</td><td>${it.descripcion}</td><td class="num">$${fmt(it.total_presup_ars)}</td><td class="num">$${fmt(it.total_gasto_ars)}</td><td class="num">${pct}%</td><td>${badge}</td></tr>`;
+  }).join('');
+}
+
+function renderMateriales(d){
+  document.getElementById('kpi-materiales').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total Materiales</div><div class="kpi-valor">$${fmt(d.totales.monto_ars)}</div><div class="kpi-sub">${fmtUSD(d.totales.monto_usd)}</div></div>
+    <div class="kpi azul"><div class="kpi-label">Tipos de Material</div><div class="kpi-valor">${d.totales.cantidad_materiales}</div><div class="kpi-sub">distintos</div></div>
+  `;
+  // Barras por categoría
+  const maxCat = Math.max(...d.por_categoria.map(c=>c.monto_ars),1);
+  document.getElementById('cat-materiales').innerHTML = d.por_categoria.map(c=>`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:13px;font-weight:600">${c.nombre}</span>
+        <span style="font-size:13px;color:var(--accent)">$${fmt(c.monto_ars)}</span>
+      </div>
+      <div class="barra-wrap"><div class="barra" style="width:${Math.round(c.monto_ars/maxCat*100)}%"></div></div>
+    </div>`).join('');
+  const tbody = document.querySelector('#tbl-materiales tbody');
+  tbody.innerHTML = d.materiales.map(m=>`<tr><td>${m.nombre}</td><td>${m.categoria}</td><td>${m.unidad}</td><td class="num">${m.cantidad_total}</td><td class="num">$${fmt(m.monto_ars)}</td><td class="num">$${fmt(m.ultimo_precio)}</td><td>${m.ultimo_proveedor}</td></tr>`).join('');
+}
+
+function renderManoObra(d){
+  document.getElementById('kpi-manoobra').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Total MO</div><div class="kpi-valor">$${fmt(d.totales.monto_ars)}</div><div class="kpi-sub">${fmtUSD(d.totales.monto_usd)}</div></div>
+    <div class="kpi azul"><div class="kpi-label">Jornal</div><div class="kpi-valor">$${fmt(d.por_tipo.Jornal.ars)}</div></div>
+    <div class="kpi"><div class="kpi-label">Destajo</div><div class="kpi-valor">$${fmt(d.por_tipo.Destajo.ars)}</div></div>
+    <div class="kpi"><div class="kpi-label">Contrato Global</div><div class="kpi-valor">$${fmt(d.por_tipo['Contrato Global'].ars)}</div></div>
+  `;
+  const tbody = document.querySelector('#tbl-manoobra tbody');
+  tbody.innerHTML = d.por_item.map(it=>`<tr><td>${it.codigo}</td><td>${it.descripcion}</td><td class="num">$${fmt(it.monto_ars)}</td><td class="num">${fmtUSD(it.monto_usd)}</td><td class="num">${it.registros}</td></tr>`).join('');
+}
+
+function renderCertificado(d){
+  const pct = d.totales.avance_global_pct;
+  document.getElementById('kpi-certificado').innerHTML = `
+    <div class="kpi"><div class="kpi-label">Avance Global</div><div class="kpi-valor">${pct}%</div>
+      <div class="barra-wrap" style="margin-top:8px"><div class="barra ${pct>75?'verde':pct>40?'':'rojo'}" style="width:${pct}%"></div></div>
+    </div>
+    <div class="kpi"><div class="kpi-label">Presupuesto Total</div><div class="kpi-valor">$${fmt(d.totales.presup_ars)}</div></div>
+    <div class="kpi verde"><div class="kpi-label">Monto Certificado</div><div class="kpi-valor">$${fmt(d.totales.certificado_ars)}</div></div>
+    <div class="kpi"><div class="kpi-label">Obra / Comitente</div><div class="kpi-valor" style="font-size:14px">${d.obra.nombre}</div><div class="kpi-sub">${d.obra.comitente}</div></div>
+  `;
+  const tbody = document.querySelector('#tbl-certificado tbody');
+  tbody.innerHTML = d.items.map(it=>{
+    const pctIt = Math.round(it.avance_acumulado*1000)/10;
+    return `<tr><td>${it.codigo}</td><td>${it.descripcion}</td><td class="num">$${fmt(it.total_presup_ars)}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><span>${pctIt}%</span><div class="barra-wrap" style="flex:1"><div class="barra" style="width:${pctIt}%"></div></div></div></td>
+      <td class="num">$${fmt(it.monto_certificado)}</td></tr>`;
+  }).join('');
+}
+
+function exportarTabla(tablaId, nombre){
+  const tabla = document.getElementById(tablaId);
+  let csv = '';
+  tabla.querySelectorAll('tr').forEach(tr=>{
+    const cols = [...tr.querySelectorAll('th,td')].map(c=>'"'+c.textContent.trim()+'"');
+    csv += cols.join(',')+'\n';
+  });
+  const blob = new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=nombre+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+init();
+</script>
+</body>
+</html>
